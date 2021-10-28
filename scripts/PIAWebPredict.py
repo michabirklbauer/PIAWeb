@@ -16,7 +16,9 @@
 import os
 import math
 import shutil
+import random
 import streamlit as st
+from datetime import datetime
 from scripts.redirect import *
 from PIA.PIAModel import PIAModel
 
@@ -32,7 +34,7 @@ def color_code(value):
     return color
 
 #
-def predict_pdb(model_info, pdb_file, cutoff = None):
+def predict_pdb(model_info, pdb_file, cutoff = None, name = None):
 
     # check if model or interactions are given
     if isinstance(model_info, str):
@@ -44,10 +46,10 @@ def predict_pdb(model_info, pdb_file, cutoff = None):
             model = PIAModel(positives = model_info, strategy = "+", cutoff = math.ceil(len(model_info)/2))
 
     # return prediction
-    return model.predict_pdb(pdb_file)
+    return model.predict_pdb(pdb_file, name = name)
 
 #
-def predict_sdf(model_info, pdb_file, sdf_file, cutoff = None):
+def predict_sdf(model_info, pdb_file, sdf_file, cutoff = None, tmp_dir_name = "piamodel_structures_tmp"):
 
     # check if model or interactions are given
     if isinstance(model_info, str):
@@ -59,13 +61,10 @@ def predict_sdf(model_info, pdb_file, sdf_file, cutoff = None):
             model = PIAModel(positives = model_info, strategy = "+", cutoff = math.ceil(len(model_info)/2))
 
     # return prediction
-    return model.predict_sdf(pdb_file, sdf_file, save_csv = False)
+    return model.predict_sdf(pdb_file, sdf_file, save_csv = False, tmp_dir_name = tmp_dir_name)
 
 #
 def main():
-
-    if os.path.isdir("piamodel_structures_tmp"):
-        shutil.rmtree("piamodel_structures_tmp")
 
     title_1 = st.title("PIAPredict - Workflow III")
 
@@ -97,16 +96,18 @@ def main():
                 with st_stdout("info"):
                     if piamodel != None and pdb_file_1_1 != None:
                         try:
+                            # create unique file prefix
+                            output_name_prefix = datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
                             #write files
-                            with open(pdb_file_1_1.name, "wb") as f1:
+                            with open(output_name_prefix + pdb_file_1_1.name, "wb") as f1:
                                 f1.write(pdb_file_1_1.getbuffer())
-                            with open(piamodel.name, "wb") as f2:
+                            with open(output_name_prefix + piamodel.name, "wb") as f2:
                                 f2.write(piamodel.getbuffer())
                             # get prediction
-                            result_1 = predict_pdb(piamodel.name, pdb_file_1_1.name)
+                            result_1 = predict_pdb(output_name_prefix + piamodel.name, output_name_prefix + pdb_file_1_1.name, name = pdb_file_1_1.name)
                             # cleanup
-                            os.remove(pdb_file_1_1.name)
-                            os.remove(piamodel.name)
+                            os.remove(output_name_prefix + pdb_file_1_1.name)
+                            os.remove(output_name_prefix + piamodel.name)
                             # set status
                             status_1 = 0
                         except Exception as e:
@@ -140,24 +141,31 @@ def main():
                 with st_stdout("info"):
                     if piamodel != None and pdb_file_1_2 != None and sdf_file_1_2 != None:
                         try:
+                            # create unique file prefix
+                            output_name_prefix = datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
                             #write files
-                            with open(pdb_file_1_2.name, "wb") as f1:
+                            with open(output_name_prefix + pdb_file_1_2.name, "wb") as f1:
                                 f1.write(pdb_file_1_2.getbuffer())
-                            with open(sdf_file_1_2.name, "wb") as f1:
+                            with open(output_name_prefix + sdf_file_1_2.name, "wb") as f1:
                                 f1.write(sdf_file_1_2.getbuffer())
-                            with open(piamodel.name, "wb") as f3:
+                            with open(output_name_prefix + piamodel.name, "wb") as f3:
                                 f3.write(piamodel.getbuffer())
                             # get prediction
-                            result_1 = predict_sdf(piamodel.name, pdb_file_1_2.name, sdf_file_1_2.name)
+                            result_1 = predict_sdf(output_name_prefix + piamodel.name, output_name_prefix + pdb_file_1_2.name, output_name_prefix + sdf_file_1_2.name, tmp_dir_name = output_name_prefix + "_structures")
                             # cleanup
-                            os.remove(pdb_file_1_2.name)
-                            os.remove(sdf_file_1_2.name)
-                            os.remove(piamodel.name)
+                            os.remove(output_name_prefix + pdb_file_1_2.name)
+                            os.remove(output_name_prefix + sdf_file_1_2.name)
+                            os.remove(output_name_prefix + piamodel.name)
                             # set status
                             status_1 = 0
                         except Exception as e:
                             this_e = st.exception(e)
                             status_1 = 1
+                            try:
+                                if os.path.isdir(output_name_prefix + "_structures"):
+                                    shutil.rmtree(output_name_prefix + "_structures")
+                            except Exception as e_2:
+                                this_e_2 = st.exception(e_2)
                     else:
                         status_1 = 1
                         no_file = st.error("Error: Model, PDB host structure and ligands in SDF format have to be provided for prediction!")
@@ -183,7 +191,7 @@ def main():
     interactions_help_str = "Enter a list of interactions that are important for ligand binding, each interaction present in a protein-ligand complex will increase the score by one. "
     interactions_help_str += "Each interaction has to be in the format as given in the example and must be separated by a comma from the next interaction in the list."
     interactions = st.text_area(label = "Enter a list of interactions (an example is given):",
-                                value = "Hydrogen_Bond:TYR383A,Hydrogen_Bond:ASP335A,Pi-Stacking:TRP336A,Hydrogen_Bond:TYR466A,Pi-Stacking:HIS524A",
+                                value = "Hydrogen_Bond:TYR383A, Hydrogen_Bond:ASP335A, Pi-Stacking:TRP336A, Hydrogen_Bond:TYR466A, Pi-Stacking:HIS524A",
                                 height = 250,
                                 help = interactions_help_str
                                 )
@@ -215,8 +223,10 @@ def main():
                 with st_stdout("info"):
                     if pdb_file_2_1 != None:
                         try:
+                            # create unique file prefix
+                            output_name_prefix = datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
                             #write files
-                            with open(pdb_file_2_1.name, "wb") as f1:
+                            with open(output_name_prefix + pdb_file_2_1.name, "wb") as f1:
                                 f1.write(pdb_file_2_1.getbuffer())
                             #process cutoff
                             try:
@@ -224,9 +234,9 @@ def main():
                             except:
                                 cutoff_2_1 = None
                             # get prediction
-                            result_2 = predict_pdb([i.strip() for i in interactions.split(",")], pdb_file_2_1.name, cutoff = cutoff_2_1)
+                            result_2 = predict_pdb([i.strip() for i in interactions.split(",")], output_name_prefix + pdb_file_2_1.name, cutoff = cutoff_2_1, name = pdb_file_2_1.name)
                             # cleanup
-                            os.remove(pdb_file_2_1.name)
+                            os.remove(output_name_prefix + pdb_file_2_1.name)
                             # set status
                             status_2 = 0
                         except Exception as e:
@@ -260,10 +270,12 @@ def main():
                 with st_stdout("info"):
                     if pdb_file_2_2 != None and sdf_file_2_2 != None:
                         try:
+                            # create unique file prefix
+                            output_name_prefix = datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
                             #write files
-                            with open(pdb_file_2_2.name, "wb") as f1:
+                            with open(output_name_prefix + pdb_file_2_2.name, "wb") as f1:
                                 f1.write(pdb_file_2_2.getbuffer())
-                            with open(sdf_file_2_2.name, "wb") as f1:
+                            with open(output_name_prefix + sdf_file_2_2.name, "wb") as f1:
                                 f1.write(sdf_file_2_2.getbuffer())
                             #process cutoff
                             try:
@@ -271,15 +283,20 @@ def main():
                             except:
                                 cutoff_2_2 = None
                             # get prediction
-                            result_2 = predict_sdf([i.strip() for i in interactions.split(",")], pdb_file_2_2.name, sdf_file_2_2.name, cutoff = cutoff_2_2)
+                            result_2 = predict_sdf([i.strip() for i in interactions.split(",")], output_name_prefix + pdb_file_2_2.name, output_name_prefix + sdf_file_2_2.name, cutoff = cutoff_2_2, tmp_dir_name = output_name_prefix + "_structures")
                             # cleanup
-                            os.remove(pdb_file_2_2.name)
-                            os.remove(sdf_file_2_2.name)
+                            os.remove(output_name_prefix + pdb_file_2_2.name)
+                            os.remove(output_name_prefix + sdf_file_2_2.name)
                             # set status
                             status_2 = 0
                         except Exception as e:
                             this_e = st.exception(e)
                             status_2 = 1
+                            try:
+                                if os.path.isdir(output_name_prefix + "_structures"):
+                                    shutil.rmtree(output_name_prefix + "_structures")
+                            except Exception as e_2:
+                                this_e_2 = st.exception(e_2)
                     else:
                         status_2 = 1
                         no_file = st.error("Error: PDB host structure and ligands in SDF format have to be provided for prediction!")

@@ -49,14 +49,14 @@ def score(pdb_file, sdf_file_1, sdf_file_2 = None, poses = "best", test_size = 0
     output_name_prefix = sdf_file_1.name.split(".sdf")[0] + datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
 
     # write uploaded files to tmp directory
-    with open("pdb_file.pdb", "wb") as f1:
+    with open(output_name_prefix + "_pdb_file.pdb", "wb") as f1:
         f1.write(pdb_file.getbuffer())
-    with open("sdf_file_1.sdf", "wb") as f2:
+    with open(output_name_prefix + "_sdf_file_1.sdf", "wb") as f2:
         f2.write(sdf_file_1.getbuffer())
     if sdf_file_2 != None:
-        with open("sdf_file_2.sdf", "wb") as f2:
+        with open(output_name_prefix + "_sdf_file_2.sdf", "wb") as f2:
             f2.write(sdf_file_2.getbuffer())
-        this_sdf_file_2 = "sdf_file_2.sdf"
+        this_sdf_file_2 = output_name_prefix + "_sdf_file_2.sdf"
     else:
         this_sdf_file_2 = None
 
@@ -65,10 +65,10 @@ def score(pdb_file, sdf_file_1, sdf_file_2 = None, poses = "best", test_size = 0
 
     # train model
     model = PIAModel()
-    train_results = model.train("pdb_file.pdb", "sdf_file_1.sdf", this_sdf_file_2,
+    train_results = model.train(output_name_prefix + "_pdb_file.pdb", output_name_prefix + "_sdf_file_1.sdf", this_sdf_file_2,
                                 poses = poses, test_size = test_size, val_size = val_size,
                                 labels_by = labels_by, condition_operator = condition_operator, condition_value = this_condition_value,
-                                plot_prefix = output_name_prefix,  keep_files = False)
+                                plot_prefix = output_name_prefix,  keep_files = False, tmp_dir_name = output_name_prefix + "_structures")
 
     # append comparison plots to filelist
     filelist.append(output_name_prefix + "_comparison_train.png")
@@ -173,10 +173,10 @@ def score(pdb_file, sdf_file_1, sdf_file_2 = None, poses = "best", test_size = 0
     # cleanup
     for f in filelist:
         os.remove(f)
-    os.remove("pdb_file.pdb")
-    os.remove("sdf_file_1.sdf")
+    os.remove(output_name_prefix + "_pdb_file.pdb")
+    os.remove(output_name_prefix + "_sdf_file_1.sdf")
     if sdf_file_2 != None:
-        os.remove("sdf_file_2.sdf")
+        os.remove(output_name_prefix + "_sdf_file_2.sdf")
 
     # create return dict
     result = {"statistics": model.statistics,
@@ -194,9 +194,6 @@ def score(pdb_file, sdf_file_1, sdf_file_2 = None, poses = "best", test_size = 0
 
 #
 def main():
-
-    if os.path.isdir("piamodel_structures_tmp"):
-        shutil.rmtree("piamodel_structures_tmp")
 
     title = st.title("PIAScore - Workflow II")
 

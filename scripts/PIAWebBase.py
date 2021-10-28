@@ -16,6 +16,7 @@
 import os
 import json
 import shutil
+import random
 import urllib.request as ur
 from datetime import datetime
 import streamlit as st
@@ -40,17 +41,20 @@ def extract_codes(list_of_codes, normalize = True):
     filenames = [i + ".pdb" if i.split(".")[-1] != "pdb" else i for i in list_of_codes]
     download_links = ["https://files.rcsb.org/download/" + i for i in filenames]
 
+    # create unique file prefix
+    output_name_prefix = datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
+
     # download files
     for i, link in enumerate(download_links):
-        ur.urlretrieve(link, filenames[i])
+        ur.urlretrieve(link, output_name_prefix + filenames[i])
         print("Downloaded ", filenames[i])
 
     # extract interactions and frequencies
-    result = PIA(filenames, normalize = normalize)
+    result = PIA([output_name_prefix + fn for fn in filenames], normalize = normalize)
 
     # cleanup
     for f in filenames:
-        os.remove(f)
+        os.remove(output_name_prefix + f)
 
     return result
 
@@ -58,39 +62,39 @@ def extract_codes(list_of_codes, normalize = True):
 #@st.cache
 def extract_sdf(pdb_file, sdf_file, poses = "best", normalize = True):
 
+    # create unique file prefix
+    output_name_prefix = sdf_file.name.split(".sdf")[0] + datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
+
     # create necessary directories
-    structures_directory = "piascript_structures_tmp"
+    structures_directory = output_name_prefix + "_structures"
     structures_path = os.path.join(os.getcwd(), structures_directory)
     os.mkdir(structures_path)
 
     # write uploaded files to tmp directory
-    with open("pdb_file.pdb", "wb") as f1:
+    with open(output_name_prefix + "_pdb_file.pdb", "wb") as f1:
         f1.write(pdb_file.getbuffer())
-    with open("sdf_file.sdf", "wb") as f2:
+    with open(output_name_prefix + "_sdf_file.sdf", "wb") as f2:
         f2.write(sdf_file.getbuffer())
 
     # extract interactions and frequencies
     p = Preparation()
-    pdb = p.remove_ligands("pdb_file.pdb", "pdb_file_cleaned.pdb")
-    ligands = p.get_ligands("sdf_file.sdf")
-    sdf_metainfo = p.get_sdf_metainfo("sdf_file.sdf")
+    pdb = p.remove_ligands(output_name_prefix + "_pdb_file.pdb", output_name_prefix + "_pdb_file_cleaned.pdb")
+    ligands = p.get_ligands(output_name_prefix + "_sdf_file.sdf")
+    sdf_metainfo = p.get_sdf_metainfo(output_name_prefix + "_sdf_file.sdf")
     ligand_names = sdf_metainfo["names"]
-    structures = p.add_ligands_multi("pdb_file_cleaned.pdb", "piascript_structures_tmp", ligands)
+    structures = p.add_ligands_multi(output_name_prefix + "_pdb_file_cleaned.pdb", structures_directory, ligands)
     result = PIA(structures, ligand_names = ligand_names, poses = poses, path = "current", normalize = normalize)
 
     # cleanup
-    shutil.rmtree("piascript_structures_tmp")
-    os.remove("pdb_file.pdb")
-    os.remove("pdb_file_cleaned.pdb")
-    os.remove("sdf_file.sdf")
+    shutil.rmtree(structures_directory)
+    os.remove(output_name_prefix + "_pdb_file.pdb")
+    os.remove(output_name_prefix + "_pdb_file_cleaned.pdb")
+    os.remove(output_name_prefix + "_sdf_file.sdf")
 
     return result
 
 #
 def main():
-
-    if os.path.isdir("piascript_structures_tmp"):
-        shutil.rmtree("piascript_structures_tmp")
 
     title = st.title("PIA - Workflow I")
 
@@ -104,7 +108,7 @@ def main():
         text_1_1 = st.markdown("**Input Mode I - PDB Codes:**")
 
         pdb_codes = st.text_area(label = "Enter a list of PDB codes (an example is given):",
-                                 value = "5FP0,5MWA,6AUM,6FR2,6HGV",
+                                 value = "5FP0, 5MWA, 6AUM, 6FR2, 6HGV",
                                  height = 250,
                                  help = "Enter a list of 4 character PDB identifier codes separated by commas to analyze them. For example: '5FP0,5MWA,6AUM,6FR2,6HGV'")
 

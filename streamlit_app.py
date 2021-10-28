@@ -39,17 +39,16 @@ def main():
                                      "About": about_str}
                        )
 
-    pages = [{"title": "PIA: Extract Interactions", "function": PIAWebBase.main},
-             {"title": "PIAScore: Score Complexes", "function": PIAWebScore.main},
-             {"title": "PIAPredict: Predict Complexes", "function": PIAWebPredict.main}]
+    pages = ("PIA: Extract Interactions", "PIAScore: Score Complexes", "PIAPredict: Predict Complexes")
 
     title = st.sidebar.title("PIA - Protein Interaction Analyzer")
 
     logo = st.sidebar.image("img/pmu_logo.jpg", caption = "PIA was developed in cooperation with the Institute of Pharmacy of the Paracelsus Medical Private University Salzburg.")
 
-    page = st.sidebar.selectbox("Select a Workflow:",
-                                pages,
-                                format_func = lambda page: page["title"]
+    page = st.sidebar.selectbox(label = "Select a Workflow:",
+                                options = pages,
+                                index = 0,
+                                help = "Select a workflow that you want to run."
                                 )
 
     doc_str = "**PIA** - short for **Protein Interaction Analyzer** - is a tool for automatic identification of important "
@@ -64,7 +63,14 @@ def main():
     license_str = "**License:** [MIT License](https://github.com/michabirklbauer/piaweb/blob/master/LICENSE.md)"
     license = st.sidebar.markdown(license_str)
 
-    page["function"]()
+    if page == "PIA: Extract Interactions":
+        PIAWebBase.main()
+    elif page == "PIAScore: Score Complexes":
+        PIAWebScore.main()
+    elif page == "PIAPredict: Predict Complexes":
+        PIAWebPredict.main()
+    else:
+        PIAWebBase.main()
 
 if __name__ == "__main__":
     main()
