@@ -4,7 +4,7 @@
 
 Requirements, installation and usage are thoroughly documented in the [PIA Wiki](https://github.com/michabirklbauer/PIA/wiki).
 
-For general help, questions, suggestions or any other feedback please refer to the [PIA GitHub repository](https://github.com/michabirklbauer/PIA).
+For general help, questions, suggestions or any other feedback please refer to the [PIA repository](https://github.com/michabirklbauer/PIA).
 
 ## Quick Setup
 
