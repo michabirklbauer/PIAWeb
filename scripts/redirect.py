@@ -40,7 +40,7 @@ def st_stdout(dst):
     with st_redirect(sys.stdout, dst):
         yield
 
-# write sys.stdout to streamlit dst
+# write sys.stderr to streamlit dst
 @contextmanager
 def st_stderr(dst):
     with st_redirect(sys.stderr, dst):

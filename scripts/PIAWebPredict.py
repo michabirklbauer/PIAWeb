@@ -22,7 +22,7 @@ from datetime import datetime
 from scripts.redirect import *
 from PIA.PIAModel import PIAModel
 
-#
+# color encoding for pandas dataframes
 def color_code(value):
     if value == "inactive":
         color = "background-color: #b90e0a; color: white"
@@ -33,7 +33,7 @@ def color_code(value):
 
     return color
 
-#
+# workflow to predict a single protein-ligand complex
 def predict_pdb(model_info, pdb_file, cutoff = None, name = None):
 
     # check if model or interactions are given
@@ -48,7 +48,7 @@ def predict_pdb(model_info, pdb_file, cutoff = None, name = None):
     # return prediction
     return model.predict_pdb(pdb_file, name = name)
 
-#
+# workflow to predict multiple protein-ligand complexes
 def predict_sdf(model_info, pdb_file, sdf_file, cutoff = None, tmp_dir_name = "piamodel_structures_tmp"):
 
     # check if model or interactions are given
@@ -63,7 +63,7 @@ def predict_sdf(model_info, pdb_file, sdf_file, cutoff = None, tmp_dir_name = "p
     # return prediction
     return model.predict_sdf(pdb_file, sdf_file, save_csv = False, tmp_dir_name = tmp_dir_name)
 
-#
+# main page
 def main():
 
     title_1 = st.title("PIAPredict - Workflow III")

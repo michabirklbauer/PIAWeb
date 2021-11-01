@@ -24,7 +24,7 @@ from scripts.redirect import *
 from PIA.PIAScore import *
 from PIA.PIAModel import PIAModel
 
-#
+# return model configuration as string in json format
 def export_model(model, strat = "+"):
 
     s, c = model.change_strategy(strat)
@@ -37,7 +37,7 @@ def export_model(model, strat = "+"):
 
     return json.dumps(model_config)
 
-#
+# scoring workflow
 # don't cache! -> caching takes forever
 #@st.cache
 def score(pdb_file, sdf_file_1, sdf_file_2 = None, poses = "best", test_size = 0.3, val_size = 0.3, labels_by = "name", condition_operator = ">=", condition_value = 1000):
@@ -192,7 +192,7 @@ def score(pdb_file, sdf_file_1, sdf_file_2 = None, poses = "best", test_size = 0
 
     return result
 
-#
+# main page
 def main():
 
     title = st.title("PIAScore - Workflow II")

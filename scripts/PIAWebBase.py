@@ -17,14 +17,14 @@ import os
 import json
 import shutil
 import random
+import streamlit as st
 import urllib.request as ur
 from datetime import datetime
-import streamlit as st
 from scripts.redirect import *
 from PIA.PIA import PIA
 from PIA.PIA import Preparation
 
-#
+# return result as string in csv format
 def return_csv(PIAResult):
 
     frequencies_csv = "Interaction,Frequency\n"
@@ -33,7 +33,7 @@ def return_csv(PIAResult):
 
     return frequencies_csv
 
-#
+# workflow to extract interactions from a list of PDB codes
 #@st.cache
 def extract_codes(list_of_codes, normalize = True):
 
@@ -58,7 +58,7 @@ def extract_codes(list_of_codes, normalize = True):
 
     return result
 
-#
+# workflow to extract interactions from protein-ligand complexes in SDF format
 #@st.cache
 def extract_sdf(pdb_file, sdf_file, poses = "best", normalize = True):
 
@@ -93,7 +93,7 @@ def extract_sdf(pdb_file, sdf_file, poses = "best", normalize = True):
 
     return result
 
-#
+# main page
 def main():
 
     title = st.title("PIA - Workflow I")
