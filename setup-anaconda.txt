@@ -6,5 +6,5 @@ conda install -c conda-forge matplotlib
 conda install pip
 pip install numpy
 pip install lxml
-pip install plip --no-deps
-pip install streamlit
+pip install plip==2.2.2 --no-deps
+pip install streamlit==1.1.0
