@@ -1,6 +1,6 @@
 # Dockerfile with the PIA package installed and PIAWeb
 # author: Micha Birklbauer
-# version: 1.0.0
+# version: 1.0.1
 
 FROM ubuntu:20.04
 
@@ -23,10 +23,10 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install numpy
 RUN pip3 install pandas
 RUN pip3 install scikit-learn
-RUN pip3 install plip --no-deps
+RUN pip3 install plip==2.2.2 --no-deps
 RUN pip3 install biopandas
 RUN pip3 install matplotlib
-RUN pip3 install streamlit
+RUN pip3 install streamlit==1.1.0
 RUN pip3 install jupyterlab
 
 RUN git clone https://github.com/michabirklbauer/pia.git
