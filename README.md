@@ -8,7 +8,7 @@ For general help, questions, suggestions or any other feedback please refer to t
 
 ## Quick Setup
 
-- Install [Docker](https://docs.docker.com/engine/install/).
+- Install [Docker](https://docs.docker.com/engine/install/) (short manual [here](https://github.com/michabirklbauer/PIA/blob/master/DOCKER.md)).
 - To run PIAWeb on your own server:
   ```bash
   docker run -d --restart always -p 80:8501 michabirklbauer/piaweb:latest
