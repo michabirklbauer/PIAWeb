@@ -127,9 +127,9 @@ def main():
                                     )
 
         poses = st.selectbox("Poses to analyze:",
-                              options = ["Best", "all"],
-                              help = "Poses to analyze.\n'Best' -> For every ligand only the pose with the most interactions will be analyzed.\n'All' -> All poses will be analyzed.",
-                            )
+                             options = ["Best", "All"],
+                             help = "Poses to analyze.\n'Best' -> For every ligand only the pose with the most interactions will be analyzed.\n'All' -> All poses will be analyzed.",
+                             )
 
     col_1b, col_2b = st.columns(2)
 
