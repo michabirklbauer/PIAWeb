@@ -1,6 +1,6 @@
 # Dockerfile with the PIA package installed and PIAWeb
 # author: Micha Birklbauer
-# version: 1.0.1
+# version: 1.0.2
 
 FROM ubuntu:20.04
 
