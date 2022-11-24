@@ -126,6 +126,11 @@ def main():
                                     help = "The coordinates of the docked ligands in SDF format. Not all SD files might be supported. Supported software: GOLD."
                                     )
 
+        poses = st.radio("Poses to analyze:",
+                         options = ("Best", "all"),
+                         help = "Poses to analyze.\n'Best' -> For every ligand only the pose with the most interactions will be analyzed.\n'All' -> All poses will be analyzed.",
+                         horizontal = True)
+
     col_1b, col_2b = st.columns(2)
 
     result = None
@@ -152,7 +157,7 @@ def main():
                 with st_stdout("info"):
                     if pdb_file != None and sdf_file != None:
                         try:
-                            result = extract_sdf(pdb_file, sdf_file)
+                            result = extract_sdf(pdb_file, sdf_file, poses.lower())
                             status_2 = 0
                         except Exception as e:
                             this_e = st.exception(e)
