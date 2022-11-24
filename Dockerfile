@@ -26,6 +26,7 @@ RUN pip3 install scikit-learn
 RUN pip3 install plip==2.2.2 --no-deps
 RUN pip3 install biopandas
 RUN pip3 install matplotlib
+RUN pip3 install protobuf<=3.20.0
 RUN pip3 install streamlit==1.1.0
 RUN pip3 install jupyterlab
 
