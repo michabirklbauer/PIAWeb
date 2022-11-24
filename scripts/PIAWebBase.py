@@ -126,10 +126,10 @@ def main():
                                     help = "The coordinates of the docked ligands in SDF format. Not all SD files might be supported. Supported software: GOLD."
                                     )
 
-        poses = st.radio("Poses to analyze:",
-                         options = ("Best", "all"),
-                         help = "Poses to analyze.\n'Best' -> For every ligand only the pose with the most interactions will be analyzed.\n'All' -> All poses will be analyzed.",
-                         horizontal = True)
+        poses = st.selectbox("Poses to analyze:",
+                              options = ["Best", "all"],
+                              help = "Poses to analyze.\n'Best' -> For every ligand only the pose with the most interactions will be analyzed.\n'All' -> All poses will be analyzed.",
+                            )
 
     col_1b, col_2b = st.columns(2)
 
